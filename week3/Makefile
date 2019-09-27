@@ -1,4 +1,4 @@
-resolver: week2.o
-	gcc -o resolver week2.o
-week2.o : week2.c
-	gcc -c week2.c
+resolver: week3.o
+	gcc -o resolver week3.o
+week2.o : week3.c
+	gcc -c week3.c
