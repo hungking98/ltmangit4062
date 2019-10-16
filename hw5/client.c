@@ -64,6 +64,7 @@ int main(int argc, char **argv){
 		switch(n){
 		case 1:
 		{	char thongbao[256];
+			memset(thongbao,'\0',sizeof(thongbao));
 			printf("[+]Nhap tai khoan:\n"); __fpurge(stdin); gets(taikhoan);
 			write(client_sock,taikhoan,256);
 			printf("[+]Nhap mat khau:\n");__fpurge(stdin); gets(matkhau);
@@ -90,6 +91,29 @@ int main(int argc, char **argv){
 		case 2:
 		{	//kiem tra tai khoan co dang dang nhap khong
 			//neu dang dang nhap thi out, neu chua thi thong bao chua dang nhap
+			char thongbao[256];
+			char user_out[256];
+			char curent_user[256];
+			memset(thongbao,'\0',sizeof(thongbao));
+			
+			read(client_sock,thongbao,256);
+			if(strcmp(thongbao,"[+]Tien hanh dang xuat...")==0){
+				write(client_sock,"OK",256);
+				printf("%s\n",thongbao );
+				read(client_sock,curent_user,256);
+				do{
+				memset(user_out,'\0',sizeof(user_out));
+				printf("Nhap ten tai khoan dang dang nhap:\n" ); __fpurge(stdin);  gets(user_out);
+				if(strcmp(user_out,curent_user)==0){
+					printf("[+]Dang xuat thanh cong. Bye %s\n",curent_user);
+					write(client_sock,"Dang xuat thanh cong",256);
+					break;
+				}else{
+					printf("Nhap sai ten tai khoan dang su sung! Dang xuat that bai\n");
+				}
+				}while(1);
+			}
+			else printf("%s\n",thongbao );
 			break;
 		}
 		case 3:

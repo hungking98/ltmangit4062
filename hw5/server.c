@@ -67,6 +67,7 @@ int main(int argc, char ** argv){
 	pid_t childpid;
 	int n; //kiem tra xem client yeu cau Sign hay Sign 
 	FILE *fin;
+	char curren_user[256];
 	if(argc!=2){
 		printf("Sai so luong doi so truyen vao, nhap lai theo dang ./server PortNum\n");
 		exit(1);
@@ -112,12 +113,16 @@ int main(int argc, char ** argv){
 		printf("[+]Connection accepted from %s:%d\n", inet_ntoa(client.sin_addr), ntohs(client.sin_port));
 		
 		
-		if((childpid = fork()) == 0){    // tao ra 1 tien trinh con
+		if((childpid = fork()) == 0)
+		{    // tao ra 1 tien trinh con
 		close(listen_sock);
-		read(new_sock,&n,sizeof(n));
-		printf("%d\n",n );
+		
 		do{
-		if(n==1){
+			read(new_sock,&n,sizeof(n));
+			printf("%d\n",n );
+			switch(n){
+			case 1:
+			{
 			read(new_sock,taikhoan,256);
 			printf("[+]Tai khoan nguoi dung nhap: %s\n",taikhoan );
 			read(new_sock,matkhau,256);
@@ -126,9 +131,9 @@ int main(int argc, char ** argv){
 			fin=fopen("acount.txt","r");
 			int i=0;
 			while(!feof(fin)){
-				fscanf(fin,"%s %s %d\n",list[i].user_id, list[i].pass, &list[i].status);
-				i++;
-			}
+								fscanf(fin,"%s %s %d\n",list[i].user_id, list[i].pass, &list[i].status);
+								i++;
+							}
 			fclose(fin);
 			int soluong=i;
 		
@@ -141,7 +146,7 @@ int main(int argc, char ** argv){
 				//truong hop dung user nhung sai mat khau, thong bao ve client+ tang bien check.
 				if(check_Status(list,taikhoan,soluong)==0){
 					write(new_sock,"[-]Tai khoan da bi khoa",strlen("[-]Tai khoan da bi khoa"));
-					exit(1);
+					break;
 				}
 				while(1){
 						if(check_Pass(list,matkhau,soluong)==0){
@@ -149,6 +154,7 @@ int main(int argc, char ** argv){
 						check_status+=1;
 						read(new_sock,matkhau,256);
 						if(check_status==3){
+							write(new_sock,"[-]Tai khoan bi khoa do dang nhap sai qua 3 lan!",strlen("[-]Tai khoan bi khoa so dang nhap sai qua 3 lan!"));
 							update_Status(list,taikhoan,soluong,fin);
 							printf("[-]May chu khoa tai khoan %s\n",taikhoan );
 							break;
@@ -157,23 +163,50 @@ int main(int argc, char ** argv){
 						//truong hop dung user dung pass, gui thong bao hello user
 					
 						char pass_login[256];
+						memset(pass_login,'\0',sizeof(pass_login));
 						strcat(pass_login,"[+]Dang nhap thanh cong!\n[+]Hello");
 						strcat(pass_login," ");
 						strcat(pass_login,taikhoan);
 
 						write(new_sock,pass_login,256);
+						memset(curren_user,'\0',sizeof(curren_user));
+						strcat(curren_user,taikhoan);
 						break;
 					}
 				}
 				
 			}
-			else{ write(new_sock,"Tai khoan khong ton tai",strlen("Tai khoan khong ton tai"));} //gui thong bao la tk khong ton tai ve client
-		}else{ // chuc nang Sign Out
+			else{ write(new_sock,"[-]Tai khoan khong ton tai",strlen("[-]Tai khoan khong ton tai"));} //gui thong bao la tk khong ton tai ve client
 			break;
+			}
+				case 2:
+				{ // chuc nang Sign Out
+					char buff1[256],buff2[256];
+					memset(buff1,'\0',sizeof(buff1));
+					memset(buff2,'\0',sizeof(buff2));
+					printf("Nguoi dung chon dang xuat...\n");
+					if (strcmp(curren_user,taikhoan)==0)
+					{
+						write(new_sock,"[+]Tien hanh dang xuat...",strlen("[+]Tien hanh dang xuat..."));
+						read(new_sock,buff1,256);
+						write(new_sock,curren_user,256);
+						read(new_sock,buff2,256);
+						if(strcmp(buff2,"Dang xuat thanh cong")==0)
+							memset(curren_user,'\0',sizeof(curren_user));
+					}
+					else write(new_sock,"[-]Chua dang nhap", strlen("[-]Chua dang nhap"));
+					
+					break;
+				}
+
+				case 3:
+				{	printf("Exit\n");
+					break;
+				}
+			}
+			}while(n!=3);
 		}
-	}while(n!=3);
-		}
-	}
+			}
 	close(new_sock);
 
 	return 0;
