@@ -56,7 +56,7 @@ int main(int argc, char ** argv){
 		bytes_sent = sendto(client_sock, buff, strlen(buff), 0, (struct sockaddr *) &server_addr, sin_size);
 		//printf("%d\n", bytes_sent );
 		if(bytes_sent <= 0){
-			printf("\nConnection closed!\n");
+			printf("\nBan vua nhap xau rong\n");
 			break;
 		}
 		memset(buff,'\0',(strlen(buff)+1));

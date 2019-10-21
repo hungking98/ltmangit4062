@@ -88,7 +88,7 @@ int main(int argc, char **argv){
 	//Step 4: Communicate with client
 	while(1){
 
-		printf("------------------------------------------------\n");
+		//printf("------------------------------------------------\n");
 		new_sock = accept(listen_sock,( struct sockaddr *)&client, &sin_size);
 		if (new_sock<0)
 		{
